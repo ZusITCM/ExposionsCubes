@@ -28,34 +28,31 @@ public class Spawner : MonoBehaviour
 
     private void Start()
     {
-        _cube.Clicked += CubeSplit;
+        _cube.Clicked += SplitCube;
     }
 
     private void AddCube(Cube cube)
     {
-        cube.Clicked += CubeSplit;
-        cube.Destroyed += CubeDestroyed;
+        cube.Clicked += SplitCube;
+        cube.Destroyed += OnCubeDestroyed;
 
         _activeCubes.Add(cube);
     }
 
-    private void CubeSplit(Cube cube)
+    private void SplitCube(Cube cube)
     {
-        cube.Clicked -= CubeSplit;
-        cube.Destroyed -= CubeDestroyed;
+        OnCubeDestroyed(cube);
 
         Vector3 changeScale = cube.transform.localScale / cube.ScaleDevider;
         float changeSplitChance = cube.SplitChance / cube.ScaleDevider;
 
-        _activeCubes.Remove(cube);
-
         Spawn(cube.transform.position, changeScale, changeSplitChance);
     }
 
-    private void CubeDestroyed(Cube cube)
+    private void OnCubeDestroyed(Cube cube)
     {
-        cube.Clicked -= CubeSplit;
-        cube.Destroyed -= CubeDestroyed;
+        cube.Clicked -= SplitCube;
+        cube.Destroyed -= OnCubeDestroyed;
 
         _activeCubes.Remove(cube);
     }
@@ -69,12 +66,12 @@ public class Spawner : MonoBehaviour
             Cube cubeClone = Instantiate(_cubePrefab, position, Random.rotation);
 
             cubeClone.transform.localScale = newScale;
-            cubeClone.CubeColor.material.color = new Color(Random.value, Random.value, Random.value);
+            cubeClone.Color.material.color = new Color(Random.value, Random.value, Random.value);
 
             cubeClone.Init(newSplitChance);
 
-            if (cubeClone.CubeRigidbody != null)
-                _exploder.Explode(cubeClone.CubeRigidbody, position);
+            if (cubeClone.Rigidbody != null)
+                _exploder.Explode(cubeClone.Rigidbody, position);
 
             AddCube(cubeClone);
         }

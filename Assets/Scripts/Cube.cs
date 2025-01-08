@@ -9,9 +9,9 @@ public class Cube : MonoBehaviour
     public event UnityAction<Cube> Clicked;
     public event UnityAction<Cube> Destroyed;
 
-    public Rigidbody CubeRigidbody { get; private set; }
+    public Rigidbody Rigidbody { get; private set; }
 
-    public Renderer CubeColor {  get; private set; }
+    public Renderer Color {  get; private set; }
 
     [Tooltip("Делитель размера")]
     [field: SerializeField, Range(1, 10)] public int ScaleDevider { get; private set; } = 2;
@@ -24,16 +24,18 @@ public class Cube : MonoBehaviour
 
     private void Awake()
     {
-        CubeRigidbody = GetComponent<Rigidbody>();
-        CubeColor = GetComponent<Renderer>();
+        Rigidbody = GetComponent<Rigidbody>();
+        Color = GetComponent<Renderer>();
     }
 
     private void OnMouseDown()
     {
         if (Random.value <= SplitChance)
-            SplitCube();
+            Split();
         else
-            DestroyCube();
+            Destroy();
+
+        Destroy(gameObject);
     }
 
     public void Init(float splitChance)
@@ -41,15 +43,13 @@ public class Cube : MonoBehaviour
         SplitChance = splitChance; 
     }
 
-    private void SplitCube()
+    private void Split()
     {
         Clicked?.Invoke(this);
-        Destroy(gameObject);
     }
 
-    private void DestroyCube()
+    private void Destroy()
     {
         Destroyed?.Invoke(this);
-        Destroy(gameObject);
     }
 }
