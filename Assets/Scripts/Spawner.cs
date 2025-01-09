@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-    private readonly List<Cube> _activeCubes = new();
-
     [Header("Настройка спавнера")]
 
     [Tooltip("Взрыватель")]
@@ -16,13 +14,12 @@ public class Spawner : MonoBehaviour
     [Tooltip("Максимальное количество клонов")]
     [SerializeField, Range(1, 6)] private int _countClonesMax;
 
-    [Tooltip("Количество начальных кубов")]
-    [SerializeField, Range(1, 6)] private int _startCubeCount;
-
     [Tooltip("Префаб куба")]
     [SerializeField] private Cube _cubePrefab;
 
     [SerializeField] private Cube _cube;
+
+    private readonly List<Cube> _activeCubes = new();
 
     private int _countClones;
 
@@ -65,10 +62,7 @@ public class Spawner : MonoBehaviour
         {
             Cube cubeClone = Instantiate(_cubePrefab, position, Random.rotation);
 
-            cubeClone.transform.localScale = newScale;
-            cubeClone.Color.material.color = new Color(Random.value, Random.value, Random.value);
-
-            cubeClone.Init(newSplitChance);
+            cubeClone.Init(newSplitChance, newScale);
 
             if (cubeClone.Rigidbody != null)
                 _exploder.Explode(cubeClone.Rigidbody, position);
