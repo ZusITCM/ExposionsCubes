@@ -3,10 +3,9 @@ using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Renderer))]
-
 public class Cube : MonoBehaviour
 {
-    public event UnityAction<Cube> Clicked;
+    public event UnityAction<Cube> Splited;
     public event UnityAction<Cube> Destroyed;
 
     [Tooltip("Делитель размера")]
@@ -47,7 +46,7 @@ public class Cube : MonoBehaviour
 
     private void SplitObject()
     {
-        Clicked?.Invoke(this);
+        Splited?.Invoke(this);
     }
 
     private void Destroy()

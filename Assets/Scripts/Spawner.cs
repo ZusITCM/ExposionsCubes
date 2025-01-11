@@ -1,12 +1,13 @@
 using System.Collections.Generic;
+using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Spawner : MonoBehaviour
 {
-    [Header("Настройка спавнера")]
+    public event UnityAction<Cube> Spawned;
 
-    [Tooltip("Взрыватель")]
-    [SerializeField] private Exploder _exploder;
+    [Header("Настройка спавнера")]
 
     [Tooltip("Минимальное количество клонов")]
     [SerializeField, Range(1, 6)] private int _countClonesMin;
@@ -25,12 +26,12 @@ public class Spawner : MonoBehaviour
 
     private void Start()
     {
-        _cube.Clicked += SplitCube;
+        _cube.Splited += SplitCube;
     }
 
     private void AddCube(Cube cube)
     {
-        cube.Clicked += SplitCube;
+        cube.Splited += SplitCube;
         cube.Destroyed += OnCubeDestroyed;
 
         _activeCubes.Add(cube);
@@ -48,7 +49,7 @@ public class Spawner : MonoBehaviour
 
     private void OnCubeDestroyed(Cube cube)
     {
-        cube.Clicked -= SplitCube;
+        cube.Splited -= SplitCube;
         cube.Destroyed -= OnCubeDestroyed;
 
         _activeCubes.Remove(cube);
@@ -64,10 +65,9 @@ public class Spawner : MonoBehaviour
 
             cubeClone.Init(newSplitChance, newScale);
 
-            if (cubeClone.Rigidbody != null)
-                _exploder.Explode(cubeClone.Rigidbody, position);
-
             AddCube(cubeClone);
+
+            Spawned?.Invoke(cubeClone);
         }
     }
 }

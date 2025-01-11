@@ -11,8 +11,25 @@ public class Exploder : MonoBehaviour
     [Tooltip("Радиус разлета")]
     [SerializeField, Range(1f, 10f)] private float _explosionRadius;
 
-    public void Explode(Rigidbody cube, Vector3 position)
+    private Spawner _spawner;
+
+    private void Awake()
     {
-        cube.AddExplosionForce(_explosionForce, position, _explosionRadius);
+        _spawner = FindObjectOfType<Spawner>();
+    }
+
+    private void OnEnable()
+    {
+        _spawner.Spawned += Explode;
+    }
+
+    private void OnDisable()
+    {
+        _spawner.Spawned -= Explode;
+    }
+
+    public void Explode(Cube cube)
+    {
+        cube.Rigidbody.AddExplosionForce(_explosionForce, cube.transform.position, _explosionRadius);
     }
 }
