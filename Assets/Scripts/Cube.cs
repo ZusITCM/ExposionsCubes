@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -17,9 +18,13 @@ public class Cube : MonoBehaviour
     [Tooltip("Шанс разделения")]
     [field: SerializeField, Range(0f, 1f)] public float SplitChance { get; private set; } = 1f;
 
+    [SerializeField] private Exploder _exploder;
+
     public Rigidbody Rigidbody { get; private set; }
 
-    public Renderer Color {  get; private set; }
+    public Renderer Color { get; private set; }
+
+    private List<Cube> _cubes = new List<Cube>();
 
     private void Awake()
     {
@@ -30,11 +35,35 @@ public class Cube : MonoBehaviour
     private void OnMouseDown()
     {
         if (Random.value <= SplitChance)
+        {
             SplitObject();
+            AddExplosionForce(_cubes);
+        }
         else
+        {
             Destroy();
+        }
 
         Destroy(gameObject);
+    }
+
+    public void FillListCubes(List<Cube> cubes)
+    {
+        foreach (Cube cube in cubes)
+            _cubes.Add(cube);
+    }
+
+    private void ClearListCubes()
+    {
+        _cubes.Clear();
+    }
+
+    private void AddExplosionForce(List<Cube> cubeClones)
+    {
+        foreach (Cube cube in cubeClones)
+            _exploder.Explode(cube);
+
+        ClearListCubes();
     }
 
     public void Init(float splitChance, Vector3 scale)

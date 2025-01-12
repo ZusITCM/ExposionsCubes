@@ -1,12 +1,9 @@
 using System.Collections.Generic;
-using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class Spawner : MonoBehaviour
 {
-    public event UnityAction<Cube> Spawned;
-
     [Header("Настройка спавнера")]
 
     [Tooltip("Минимальное количество клонов")]
@@ -66,8 +63,8 @@ public class Spawner : MonoBehaviour
             cubeClone.Init(newSplitChance, newScale);
 
             AddCube(cubeClone);
-
-            Spawned?.Invoke(cubeClone);
         }
+
+        _cube.FillListCubes(_activeCubes);
     }
 }

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Exploder : MonoBehaviour
@@ -10,23 +9,6 @@ public class Exploder : MonoBehaviour
 
     [Tooltip("Радиус разлета")]
     [SerializeField, Range(1f, 10f)] private float _explosionRadius;
-
-    private Spawner _spawner;
-
-    private void Awake()
-    {
-        _spawner = FindObjectOfType<Spawner>();
-    }
-
-    private void OnEnable()
-    {
-        _spawner.Spawned += Explode;
-    }
-
-    private void OnDisable()
-    {
-        _spawner.Spawned -= Explode;
-    }
 
     public void Explode(Cube cube)
     {
