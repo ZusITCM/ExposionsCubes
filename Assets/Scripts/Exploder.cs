@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Exploder : MonoBehaviour
+public class Exploder : MonoBehaviour, ICubeObserver
 {
     [Header("Настройки разлета кубов")]
 
@@ -10,8 +10,30 @@ public class Exploder : MonoBehaviour
     [Tooltip("Радиус разлета")]
     [SerializeField, Range(1f, 10f)] private float _explosionRadius;
 
-    public void Explode(Cube cube)
+    private void OnEnable()
     {
-        cube.Rigidbody.AddExplosionForce(_explosionForce, cube.transform.position, _explosionRadius);
+        Spawner spawner = FindObjectOfType<Spawner>();
+
+        if (spawner != null)
+            spawner.RegisterObserver(this);
+    }
+
+    private void OnDisable()
+    {
+        Spawner spawner = FindObjectOfType<Spawner>();
+
+        if (spawner != null)
+            spawner.UnregisterObserver(this);
+    }
+
+    public void OnCubeSpawned(Cube cube)
+    {
+        Explode(cube);
+    }
+
+    private void Explode(Cube cube)
+    {
+        if (cube.Rigidbody != null)
+            cube.Rigidbody.AddExplosionForce(_explosionForce, cube.transform.position, _explosionRadius);
     }
 }

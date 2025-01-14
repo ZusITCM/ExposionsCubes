@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class Spawner : MonoBehaviour
 {
@@ -17,7 +16,7 @@ public class Spawner : MonoBehaviour
 
     [SerializeField] private Cube _cube;
 
-    private readonly List<Cube> _activeCubes = new();
+    private List<ICubeObserver> _observers = new List<ICubeObserver>();
 
     private int _countClones;
 
@@ -26,12 +25,19 @@ public class Spawner : MonoBehaviour
         _cube.Splited += SplitCube;
     }
 
+    public void RegisterObserver(ICubeObserver observer)
+    {
+        _observers.Add(observer);
+    }
+
+    public void UnregisterObserver(ICubeObserver observer)
+    {
+        _observers.Remove(observer);
+    }
+
     private void AddCube(Cube cube)
     {
         cube.Splited += SplitCube;
-        cube.Destroyed += OnCubeDestroyed;
-
-        _activeCubes.Add(cube);
     }
 
     private void SplitCube(Cube cube)
@@ -41,30 +47,26 @@ public class Spawner : MonoBehaviour
         Vector3 changeScale = cube.transform.localScale / cube.ScaleDevider;
         float changeSplitChance = cube.SplitChance / cube.ScaleDevider;
 
-        Spawn(cube.transform.position, changeScale, changeSplitChance);
+        _countClones = Random.Range(_countClonesMin, _countClonesMax + 1);
+
+        for (int i = 0; i < _countClones; i++)
+            Spawn(cube.transform.position, changeScale, changeSplitChance);
     }
 
     private void OnCubeDestroyed(Cube cube)
     {
         cube.Splited -= SplitCube;
-        cube.Destroyed -= OnCubeDestroyed;
-
-        _activeCubes.Remove(cube);
     }
 
     private void Spawn(Vector3 position, Vector3 newScale, float newSplitChance)
     {
-        _countClones = Random.Range(_countClonesMin, _countClonesMax + 1);
+        Cube cubeClone;
 
-        for (int i = 0; i < _countClones; i++)
-        {
-            Cube cubeClone = Instantiate(_cubePrefab, position, Random.rotation);
+        cubeClone = Instantiate(_cubePrefab, position, Random.rotation);
 
-            cubeClone.Init(newSplitChance, newScale);
+        cubeClone.Init(newSplitChance, newScale);
 
-            AddCube(cubeClone);
-        }
-
-        _cube.FillListCubes(_activeCubes);
+        foreach (var observer in _observers)
+            observer.OnCubeSpawned(cubeClone);
     }
 }
