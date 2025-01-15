@@ -526,11 +526,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0c3eadb65d4f0d48b6e2f0fc579c965, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _countClonesMin: 1
+  _exploder: {fileID: 1444962035}
+  _initialCube: {fileID: 861963407}
+  _countClonesMin: 2
   _countClonesMax: 6
-  _cubePrefab: {fileID: 2114204237263972590, guid: d6ecf683aa79b504181f15e07f949877,
-    type: 3}
-  _cube: {fileID: 861963407}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -741,8 +740,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3b71508a73b8c34b8eba9c56869cd7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _explosionForce: 10
-  _explosionRadius: 1
+  _explosionForce: 100
+  _explosionRadius: 15
+  _spawner: {fileID: 590826125}
 --- !u!1 &1497998627
 GameObject:
   m_ObjectHideFlags: 0

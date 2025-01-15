@@ -1,72 +1,76 @@
-using System.Collections.Generic;
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Spawner : MonoBehaviour
 {
-    [Header("Настройка спавнера")]
+    [Tooltip("Exploder object link")]
+    [SerializeField] private Exploder _exploder;
 
-    [Tooltip("Минимальное количество клонов")]
-    [SerializeField, Range(1, 6)] private int _countClonesMin;
+    [Tooltip("Initial cube object")]
+    [SerializeField] private Cube _initialCube;
 
-    [Tooltip("Максимальное количество клонов")]
-    [SerializeField, Range(1, 6)] private int _countClonesMax;
+    [Tooltip("Minimum cube split")]
+    [SerializeField, Range(1, 6)] private int _countClonesMin = 2;
+    [Tooltip("Maximum cube split")]
+    [SerializeField, Range(1, 6)] private int _countClonesMax = 6;
 
-    [Tooltip("Префаб куба")]
-    [SerializeField] private Cube _cubePrefab;
+    private int _clonesCount;
 
-    [SerializeField] private Cube _cube;
+    private float _dispersion = 0.04f;
 
-    private List<ICubeObserver> _observers = new List<ICubeObserver>();
+    public event Action<Cube> Spawned;
 
-    private int _countClones;
+    private void OnValidate()
+    {
+        if (_countClonesMin >= _countClonesMax)
+            _countClonesMax = _countClonesMax - 1;
+    }
 
     private void Start()
     {
-        _cube.Splited += SplitCube;
+        _initialCube.Splitting += Spawn;
     }
 
-    public void RegisterObserver(ICubeObserver observer)
+    private void OnCubeSpawned(Cube cube)
     {
-        _observers.Add(observer);
-    }
-
-    public void UnregisterObserver(ICubeObserver observer)
-    {
-        _observers.Remove(observer);
-    }
-
-    private void AddCube(Cube cube)
-    {
-        cube.Splited += SplitCube;
-    }
-
-    private void SplitCube(Cube cube)
-    {
-        OnCubeDestroyed(cube);
-
-        Vector3 changeScale = cube.transform.localScale / cube.ScaleDevider;
-        float changeSplitChance = cube.SplitChance / cube.ScaleDevider;
-
-        _countClones = Random.Range(_countClonesMin, _countClonesMax + 1);
-
-        for (int i = 0; i < _countClones; i++)
-            Spawn(cube.transform.position, changeScale, changeSplitChance);
+        cube.Splitting += Spawn;
     }
 
     private void OnCubeDestroyed(Cube cube)
     {
-        cube.Splited -= SplitCube;
+        cube.Splitting -= Spawn;
     }
 
-    private void Spawn(Vector3 position, Vector3 newScale, float newSplitChance)
+    private void Spawn(Cube cube)
     {
-        Cube cubeClone;
+        _clonesCount = Random.Range(_countClonesMin, _countClonesMax + 1);
 
-        cubeClone = Instantiate(_cubePrefab, position, Random.rotation);
+        OnCubeDestroyed(cube);
 
-        cubeClone.Init(newSplitChance, newScale);
+        for (int i = 0; i < _clonesCount; i++)
+        {
+            Cube cubeClone = Instantiate(
+                cube, RandomizePosition(cube.transform.position), Quaternion.identity
+                );
 
-        foreach (var observer in _observers)
-            observer.OnCubeSpawned(cubeClone);
+            cubeClone.Init(cube.SplitChance);
+
+            OnCubeSpawned(cubeClone);
+
+            Spawned?.Invoke(cubeClone);
+        }
+    }
+
+    private Vector3 RandomizePosition(Vector3 position)
+    {
+        return new Vector3(
+            Disperce(position.x), Disperce(position.y), Disperce(position.z)
+            );
+    }
+
+    private float Disperce(float number)
+    {
+        return number + Random.Range(-_dispersion, _dispersion);
     }
 }

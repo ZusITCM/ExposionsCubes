@@ -1,48 +1,46 @@
+using System;
 using UnityEngine;
-using UnityEngine.Events;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Renderer))]
 public class Cube : MonoBehaviour
 {
-    public event UnityAction<Cube> Splited;
+    [field: SerializeField] public float SplitChance { get; private set; }
+
+    private int _scaleDevider = 2;
+    private int _chanceDevider = 2;
+
+    private Material _material;
+
+    public event Action<Cube> Splitting;
 
     public Rigidbody Rigidbody { get; private set; }
-
-    public Renderer Renderer { get; private set; }
-
-    [Tooltip("Делитель размера")]
-    [field: SerializeField, Range(1, 10)] public int ScaleDevider { get; private set; } = 2;
-
-    [Tooltip("Делитель шанса спавна")]
-    [field: SerializeField, Range(1, 10)] public int ChanceDevider { get; private set; } = 2;
-
-    [Tooltip("Шанс разделения")]
-    [field: SerializeField, Range(0f, 1f)] public float SplitChance { get; private set; } = 1f;
 
     private void Awake()
     {
         Rigidbody = GetComponent<Rigidbody>();
-        Renderer = GetComponent<Renderer>();
+        _material = GetComponent<Renderer>().material;
+
+        SplitChance = 1;
     }
 
-    private void OnMouseDown()
+    private void OnMouseUpAsButton()
     {
         if (Random.value <= SplitChance)
-            SplitObject();
+            Splitting?.Invoke(this);
 
         Destroy(gameObject);
     }
 
-    public void Init(float splitChance, Vector3 scale)
+    public void Init(float splitChance)
     {
-        SplitChance = splitChance;
-        transform.localScale = scale;
-        Renderer.material.color = new Color(Random.value, Random.value, Random.value);
-    }
+        Rigidbody.interpolation = RigidbodyInterpolation.Extrapolate;
+        Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-    private void SplitObject()
-    {
-        Splited?.Invoke(this);
+        SplitChance = splitChance / _chanceDevider;
+        transform.localScale /= _scaleDevider;
+
+        _material.color = Random.ColorHSV();
     }
 }
